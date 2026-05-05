@@ -37,61 +37,49 @@ function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+const MAX_COMMITS = 20;
+
 /**
- * Returns the number of commits to make for a given date.
+ * Returns the number of commits to make for a given date, capped at MAX_COMMITS.
  *
- * Weekday weighted distribution:
- *   40% → 0 commits (rest day)
- *   30% → 1 commit  (light green)
- *   20% → 2–3 commits (medium green)
- *   10% → 4–6 commits (dark green)
+ * Weekday distribution:
+ *   15% → 5–15   commits
+ *   35% → 20–40  commits
+ *   35% → 45–75  commits
+ *   15% → 80–100 commits
  *
- * Weekend (Saturday=6, Sunday=0): all non-zero probabilities are halved;
- * the remaining probability mass is added to the 0-commit bucket.
+ * Weekend: lighter but still meaningful.
+ *   30% → 3–8   commits
+ *   45% → 10–25 commits
+ *   25% → 30–50 commits
  *
- * Holiday: always 0 commits regardless of other logic.
+ * Holiday: always 0 commits.
  *
- * @param {Date}    date          - The date to evaluate.
- * @param {boolean} isHolidayFlag - Caller signals whether the date is a holiday.
- * @returns {number} Integer in the range 0–6.
+ * @param {Date}    date
+ * @param {boolean} isHolidayFlag
+ * @returns {number}
  */
 export function getCommitCount(date, isHolidayFlag = false) {
-  if (isHolidayFlag) {
-    return 0;
-  }
+  if (isHolidayFlag) return 0;
 
-  const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
+  const dayOfWeek = date.getDay();
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
-  // Base probabilities (as percentages summing to 100)
-  // Buckets: [0-commits, 1-commit, 2-3-commits, 4-6-commits]
-  let weights = [40, 30, 20, 10];
-
+  let count;
   if (isWeekend) {
-    // Halve every non-zero bucket: 30→15, 20→10, 10→5
-    const halved = weights.slice(1).map((w) => w / 2);
-    const remainingMass = weights.slice(1).reduce((acc, w) => acc + w, 0);
-    const addedToRest = remainingMass - halved.reduce((acc, w) => acc + w, 0);
-    weights = [weights[0] + addedToRest, ...halved];
-    // Result: [40+25, 15, 10, 5] = [65, 15, 10, 5]
+    const roll = Math.random() * 100;
+    if (roll < 30) count = randomInt(3, 8);
+    else if (roll < 75) count = randomInt(10, 25);
+    else count = randomInt(30, 50);
+  } else {
+    const roll = Math.random() * 100;
+    if (roll < 15) count = randomInt(5, 15);
+    else if (roll < 50) count = randomInt(20, 40);
+    else if (roll < 85) count = randomInt(45, 75);
+    else count = randomInt(80, 100);
   }
 
-  const total = weights.reduce((acc, w) => acc + w, 0);
-  const roll = Math.random() * total;
-
-  let cumulative = 0;
-  for (let i = 0; i < weights.length; i++) {
-    cumulative += weights[i];
-    if (roll < cumulative) {
-      if (i === 0) return 0;
-      if (i === 1) return 1;
-      if (i === 2) return randomInt(2, 3);
-      if (i === 3) return randomInt(4, 6);
-    }
-  }
-
-  // Fallback (should not be reached)
-  return 0;
+  return Math.min(count, MAX_COMMITS);
 }
 
 /**
