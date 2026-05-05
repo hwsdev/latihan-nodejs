@@ -144,7 +144,7 @@ export function createCommitter(config) {
 
         await writeActivityLog(isoDate, i, count);
 
-        await g.add('activity.log');
+        await g.raw(['add', '-f', 'activity.log']);
 
         await g.env({
           GIT_AUTHOR_DATE:    gitDateEnv,
