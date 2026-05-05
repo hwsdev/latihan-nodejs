@@ -1,0 +1,26 @@
+{
+  "name": "latihan-nodejs",
+  "version": "1.0.0",
+  "description": "GitHub contribution graph auto-commit bot with natural patterns",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dry-run": "node src/index.js --dry-run",
+    "backfill": "node src/index.js --backfill",
+    "pm2:start": "pm2 start ecosystem.config.cjs",
+    "pm2:stop": "pm2 stop github-greener",
+    "pm2:restart": "pm2 restart github-greener",
+    "pm2:logs": "pm2 logs github-greener",
+    "pm2:status": "pm2 status"
+  },
+  "dependencies": {
+    "date-fns": "^3.6.0",
+    "dotenv": "^16.4.5",
+    "node-cron": "^3.0.3",
+    "simple-git": "^3.25.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
