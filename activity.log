@@ -1,1 +1,1 @@
-[2026-05-16T09:00:06.050Z] Add retry logic for failed git push
+[2026-05-17T09:00:05.127Z] Improve error messages for missing env vars
